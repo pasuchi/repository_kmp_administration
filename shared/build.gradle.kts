@@ -75,6 +75,10 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:3.6.0")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.6.0")
 
+            implementation("org.jetbrains.androidx.navigation3:navigation3-ui:1.1.2")
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

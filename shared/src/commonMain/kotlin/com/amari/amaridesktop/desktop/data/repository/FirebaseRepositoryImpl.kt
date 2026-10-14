@@ -10,6 +10,7 @@ import com.amari.amaridesktop.desktop.domain.model.BookingM
 import com.amari.amaridesktop.desktop.domain.model.BookingModel
 import com.amari.amaridesktop.desktop.domain.model.DepositModel
 import com.amari.amaridesktop.desktop.domain.model.EnablersModel
+import com.amari.amaridesktop.desktop.domain.model.Equipment
 import com.amari.amaridesktop.desktop.domain.model.EquipmentAmariModel
 import com.amari.amaridesktop.desktop.domain.model.EquipmentMainModel
 import com.amari.amaridesktop.desktop.domain.model.EquipmentModel
@@ -241,6 +242,25 @@ class FirebaseRepositoryImpl(private val api: EquipmentApi) : FirebaseRepository
 
     override fun getListSupplier(): Flow<Result<List<SuppliersResponse>>> {
         TODO("Not yet implemented")
+    }
+
+    override fun getEquipmentKmp(): Flow<Result<List<Equipment>>> = flow {
+        try {
+            val response = api.getMantenimientosKMP()
+            val equipomentModel = response.map {
+                Equipment(
+                    nameEquipment = it.nameEquipment,
+                    uniqueCode = it.uniqueCode,
+                    orden = it.orden,
+                    periodoMant = it.periodoMant,
+                    monto = it.monto
+                )
+            }
+
+            emit(Result.success(equipomentModel))
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
     }
 
     override fun getMaintenance(): Flow<Result<List<EquipmentMantListResponse>>> = flow {

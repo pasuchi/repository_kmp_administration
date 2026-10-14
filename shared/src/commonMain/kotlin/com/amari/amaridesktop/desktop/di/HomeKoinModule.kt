@@ -9,7 +9,10 @@ import com.amari.amaridesktop.desktop.domain.usecase.GetDateLeftMaintenanceUseca
 import com.amari.amaridesktop.desktop.domain.usecase.GetLastNextMaintenanceDayUseCase
 import com.amari.amaridesktop.desktop.domain.usecase.GetMaintenanceEquipmentUseCase
 import com.amari.amaridesktop.desktop.domain.usecase.GetTotalMonthLeftUsecase
-import com.amari.amaridesktop.desktop.presentation.EquipmentViewModel
+import com.amari.amaridesktop.desktop.navigator.Home
+import com.amari.amaridesktop.desktop.navigator.Navigator
+import com.amari.amaridesktop.desktop.presentation.viewmodel.EquipmentDetailsViewmodel
+import com.amari.amaridesktop.desktop.presentation.viewmodel.EquipmentViewModel
 import com.amari.amaridesktop.desktop.util.DateUtil
 import com.amari.amaridesktop.desktop.util.DateUtilImpl
 import org.koin.core.module.dsl.factoryOf
@@ -21,6 +24,8 @@ import org.koin.dsl.module
 
 val viewModelAdminMainPresentationModule = module {
     viewModelOf(::EquipmentViewModel)
+    viewModelOf(::EquipmentDetailsViewmodel)
+
 }
 
 val presentationAdminMainModule = module {
@@ -37,10 +42,14 @@ val repositoryCoreModule = module {
     singleOf(::DateUtilImpl) bind DateUtil::class
 }
 
+val util = module {
+    single { Navigator(Home) }
+}
 
 
 
 
 val DomainAdminMainKoinModule = module {
-    includes(presentationAdminMainModule + viewModelAdminMainPresentationModule + repositoryCoreModule)
+
+    includes(presentationAdminMainModule + viewModelAdminMainPresentationModule + repositoryCoreModule + util)
 }

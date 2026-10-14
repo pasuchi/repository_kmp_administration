@@ -33,6 +33,7 @@ import com.api.core.domain.model.ParkingLotModel
 import com.api.core.domain.model.ParkingMainModel
 import com.api.core.domain.model.PropietarieExcelMainModel
 import com.amari.amaridesktop.desktop.data.SupplierRequest
+import com.amari.amaridesktop.desktop.domain.model.Equipment
 import com.api.core.domain.supplier.SuppliersResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
@@ -135,7 +136,7 @@ interface FirebaseRepository {
 
     fun getListSupplier(): Flow<Result<List<SuppliersResponse>>>
 
-
+    fun getEquipmentKmp() : Flow<Result<List<Equipment>>>
     fun getMaintenance(): Flow<Result<List<EquipmentMantListResponse>>>
     fun getMaintenanceByYear(
         year: Int,
