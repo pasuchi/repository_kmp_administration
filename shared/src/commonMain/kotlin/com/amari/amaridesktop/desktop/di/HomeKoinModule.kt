@@ -10,6 +10,8 @@ import com.amari.amaridesktop.desktop.domain.usecase.GetLastNextMaintenanceDayUs
 import com.amari.amaridesktop.desktop.domain.usecase.GetMaintenanceEquipmentUseCase
 import com.amari.amaridesktop.desktop.domain.usecase.GetTotalMonthLeftUsecase
 import com.amari.amaridesktop.desktop.navigator.Home
+import com.amari.amaridesktop.desktop.navigator.InicioRoot
+import com.amari.amaridesktop.desktop.navigator.LoginRoot
 import com.amari.amaridesktop.desktop.navigator.Navigator
 import com.amari.amaridesktop.desktop.presentation.viewmodel.EquipmentDetailsViewmodel
 import com.amari.amaridesktop.desktop.presentation.viewmodel.EquipmentViewModel
@@ -43,7 +45,7 @@ val repositoryCoreModule = module {
 }
 
 val util = module {
-    single { Navigator(Home) }
+    single { Navigator(LoginRoot) }
 }
 
 

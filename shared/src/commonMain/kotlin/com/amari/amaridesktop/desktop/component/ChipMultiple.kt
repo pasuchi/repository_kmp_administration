@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.amari.amaridesktop.AppColors
+import com.amari.amaridesktop.Colors
 import com.amari.amaridesktop.desktop.util.FontUtil.getFontUbuntuBold
 
 @Composable
@@ -27,7 +27,7 @@ fun ChipMultiple(
 
     val isSelected = selected == title
 
-    val background = if (isSelected) Color.Blue else AppColors.skyBlue
+    val background = if (isSelected) Color.Blue else Colors.skyBlue
     val contentColor = if (isSelected) Color.White else Color.White
 
     Box(

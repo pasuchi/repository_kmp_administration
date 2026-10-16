@@ -58,7 +58,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
-import com.amari.amaridesktop.AppColors
+import com.amari.amaridesktop.Colors
 import com.amari.amaridesktop.desktop.component.ChipMultiple
 import com.amari.amaridesktop.desktop.component.TitleDescription
 import com.amari.amaridesktop.desktop.component.ToolBarCustom
@@ -134,8 +134,8 @@ fun EquipmentMainScreen(
                             thickness = 12.dp,
                             shape = RoundedCornerShape(6.dp),
                             hoverDurationMillis = 300,
-                            unhoverColor = AppColors.skyBlue.copy(alpha = 0.6f),
-                            hoverColor = AppColors.skyBlue
+                            unhoverColor = Colors.skyBlue.copy(alpha = 0.6f),
+                            hoverColor = Colors.skyBlue
                         )
                     )
 
@@ -150,8 +150,8 @@ fun EquipmentMainScreen(
                               thickness = 12.dp,                          // grosor visible (default 8.dp)
                               shape = RoundedCornerShape(6.dp),
                               hoverDurationMillis = 300,
-                              unhoverColor = AppColors.skyBlue.copy(alpha = 0.6f), // visible SIEMPRE, sin hover
-                              hoverColor = AppColors.skyBlue              // se intensifica al pasar el mouse
+                              unhoverColor = Colors.skyBlue.copy(alpha = 0.6f), // visible SIEMPRE, sin hover
+                              hoverColor = Colors.skyBlue              // se intensifica al pasar el mouse
                           )
                       )*/
                 }
@@ -178,8 +178,8 @@ fun EquipmentMainScreen(
                             thickness = 12.dp,
                             shape = RoundedCornerShape(6.dp),
                             hoverDurationMillis = 300,
-                            unhoverColor = AppColors.skyBlue.copy(alpha = 0.6f),
-                            hoverColor = AppColors.skyBlue
+                            unhoverColor = Colors.skyBlue.copy(alpha = 0.6f),
+                            hoverColor = Colors.skyBlue
                         )
                     )
 
@@ -315,7 +315,7 @@ private fun EquipmentPreventivoHeader(
         modifier = Modifier
             .height(IntrinsicSize.Min)
             .fillMaxWidth()
-            .background(AppColors.skyBlue).padding(start = 12.dp, end = 12.dp),
+            .background(Colors.skyBlue).padding(start = 12.dp, end = 12.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically

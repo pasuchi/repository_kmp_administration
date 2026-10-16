@@ -1,6 +1,6 @@
 package com.amari.amaridesktop
 import androidx.compose.ui.graphics.Color
-object AppColors {
+object Colors {
     val colorPrimary = Color(0xFF3F51B5)
     val colorPrimaryDark = Color(0xFF303F9F)
     val colorAccent = Color(0xFFFF4081)

@@ -5,6 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object Home : NavKey
+@Serializable
+data object InicioRoot : NavKey
+
+@Serializable
+data object LoginRoot : NavKey
+
 
 @Serializable
 data object DetailEquipment : NavKey
