@@ -27,46 +27,63 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.amari.amaridesktop.desktop.presentation.component.LoginLoaderOverlay
+import com.amari.amaridesktop.desktop.presentation.ui.login.event.LoginEvent
 import com.amari.amaridesktop.desktop.theme.Colors
+import kotlinx.datetime.todayIn
+import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+
+import kotlin.time.ExperimentalTime
 
 // ==========================================
 // PANTALLA
 // ==========================================
 
+
+@Composable
+fun LoginScreenRoot() {
+    var cargando by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val vm: LoginViewmodel = koinViewModel()
+
+    LoginScreen(onEvent = vm::event,cargando = vm.state.collectAsStateWithLifecycle().value.isLoading,errorServidor = null)
+}
+
+
 @Composable
 fun LoginScreen(
-    onIniciarSesion: (email: String, contrasena: String) -> Unit,
-    onOlvideContrasena: () -> Unit,
+    onEvent: (LoginEvent) -> Unit,
     cargando: Boolean = false,
     errorServidor: String? = null,
-    edificio: String = "Edificio Torre Norte",
+    edificio: String = "Edificio Amari",
     version: String = "v1.0",
-    anio: Int = 2025
+    anio: Int = currentYear()
 ) {
-    var email by remember { mutableStateOf("") }
+    var userId by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var verContrasena by remember { mutableStateOf(false) }
-    var intentoEnviar by remember { mutableStateOf(false) }
+    var errorContraseña by remember { mutableStateOf(false) }
 
     val errorEmail = when {
-        !intentoEnviar -> null
-        email.isBlank() -> "Ingresa tu email"
-        !esEmailValido(email) -> "Email no válido"
+        userId.isBlank() -> "Ingresa tu usuario"
         else -> null
     }
-    val errorContrasena =
-        if (intentoEnviar && contrasena.isBlank()) "Ingresa tu contraseña" else null
+    val errorTextoContraseña = when {
+        contrasena.isBlank() -> "Ingresa tu contraseña"
+        else -> null
+    }
 
     val enviar: () -> Unit = {
-        intentoEnviar = true
-        if (!cargando && esEmailValido(email) && contrasena.isNotBlank()) {
-            onIniciarSesion(email.trim(), contrasena)
+        if (!cargando  && contrasena.isNotBlank()) {
+            onEvent(LoginEvent.Login(user =userId, password = contrasena ))
+        }else {
+            errorContraseña = true
         }
     }
     Box(Modifier.fillMaxSize()) {
-
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -121,12 +138,12 @@ fun LoginScreen(
                         Spacer(Modifier.height(24.dp))
 
                         // Email
-                        EtiquetaCampo("Email")
+                        EtiquetaCampo("Usuario")
                         OutlinedTextField(
-                            value = email,
-                            onValueChange = { email = it },
+                            value = userId,
+                            onValueChange = { userId = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("usuario@edificio.com.pe") },
+                            placeholder = { Text("usuario") },
                             leadingIcon = { Icon(Icons.Default.Email, null) },
                             singleLine = true,
                             enabled = !cargando,
@@ -162,8 +179,8 @@ fun LoginScreen(
                             else PasswordVisualTransformation(),
                             singleLine = true,
                             enabled = !cargando,
-                            isError = errorContrasena != null,
-                            supportingText = errorContrasena?.let { { Text(it) } },
+                            isError = errorContraseña,
+                            supportingText = errorTextoContraseña?.let { { Text(it) } },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Done
@@ -175,7 +192,7 @@ fun LoginScreen(
 
                         // Olvidé contraseña
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                            TextButton(onClick = onOlvideContrasena, enabled = !cargando) {
+                            TextButton(onClick = {}, enabled = !cargando) {
                                 Text(
                                     "¿Olvidaste tu contraseña?",
                                     fontSize = 13.sp,
@@ -269,24 +286,6 @@ private fun coloresCampo() = OutlinedTextFieldDefaults.colors(
 private fun esEmailValido(email: String): Boolean =
     Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$").matches(email.trim())
 
-// ==========================================
-// PRUEBA
-// ==========================================
-
-@Composable
-fun LoginScreenPrueba() {
-    var cargando by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-
-    MaterialTheme {
-        LoginScreen(
-            cargando = cargando,
-            errorServidor = error,
-            onIniciarSesion = { email, contrasena ->
-                println("Login: $email")
-                error = if (contrasena == "1234") null else "Email o contraseña incorrectos"
-            },
-            onOlvideContrasena = { println("Olvidé contraseña") }
-        )
-    }
-}
+@OptIn(ExperimentalTime::class)
+fun currentYear(): Int =
+    Clock.System.todayIn(TimeZone.currentSystemDefault()).year

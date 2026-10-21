@@ -1,4 +1,4 @@
-package com.amari.amaridesktop.desktop.presentation
+package com.amari.amaridesktop.desktop.presentation.ui.gestionmantenimiento
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -17,8 +17,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.amari.amaridesktop.desktop.navigator.GestionMantenimiento
+import com.amari.amaridesktop.desktop.presentation.component.Header
+import com.amari.amaridesktop.desktop.presentation.ui.gestionmantenimiento.event.GestionMantenimientoEvent
+import com.amari.amaridesktop.desktop.presentation.ui.newprovider.event.NewProviderEvent
+import org.koin.compose.koinInject
 
 // ---------- Colores ----------
 private object MColors {
@@ -79,9 +85,20 @@ private fun estadoDe(dias: Int) = when {
     else -> Estado.AL_DIA
 }
 
+@Composable
+fun GestionMantenimientoRoot() {
+    val vm: GestionMantenimientoViewmodel = koinInject()
+    GestionMantenimientoScreen(
+        onEvent = vm::onEvent,
+        equipos = equiposDemo,
+        aniosDisponibles = listOf(2026, 2025, 2024)
+    )
+}
+
 // ---------- Pantalla ----------
 @Composable
 fun GestionMantenimientoScreen(
+    onEvent: (GestionMantenimientoEvent) -> Unit,
     equipos: List<Equipo>,
     aniosDisponibles: List<Int>,
     anioInicial: Int = aniosDisponibles.firstOrNull() ?: 2025,
@@ -111,6 +128,10 @@ fun GestionMantenimientoScreen(
         Modifier.fillMaxSize().background(MColors.fondo).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        Header(goBack = {
+            onEvent.invoke(GestionMantenimientoEvent.GoBack())
+        }, "Gestion de mantenimiento")
+
         Header(
             equipos = equipos,
             anio = anio,
@@ -141,7 +162,11 @@ fun GestionMantenimientoScreen(
                 if (seleccionado != null) {
                     PanelDetalle(seleccionado, anio, onProgramar)
                 } else {
-                    Text("Selecciona un equipo", Modifier.align(Alignment.Center), color = MColors.textoSec)
+                    Text(
+                        "Selecciona un equipo",
+                        Modifier.align(Alignment.Center),
+                        color = MColors.textoSec
+                    )
                 }
             }
         }
@@ -150,15 +175,24 @@ fun GestionMantenimientoScreen(
 
 // ---------- Header ----------
 @Composable
-private fun Header(equipos: List<Equipo>, anio: Int, anios: List<Int>, onAnioChange: (Int) -> Unit) {
+private fun Header(
+    equipos: List<Equipo>,
+    anio: Int,
+    anios: List<Int>,
+    onAnioChange: (Int) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Column {
-            Text("Gestión de Mantenimiento", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = MColors.texto)
-            Text("Edificio Torre Norte · Calle 93 #11-27", color = MColors.textoSec)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Kpi("Total equipos", equipos.size.toString(), MColors.texto)
-            Kpi("Pendientes (≤ 30 días)", equipos.count { it.diasRestantes <= 30 }.toString(), MColors.proximo)
+            Kpi(
+                "Pendientes (≤ 30 días)",
+                equipos.count { it.diasRestantes <= 30 }.toString(),
+                MColors.proximo
+            )
             Kpi("Urgentes", equipos.count { it.diasRestantes <= 7 }.toString(), MColors.urgente)
             Spacer(Modifier.weight(1f))
             SelectorAnio(anio, anios, onAnioChange)
@@ -168,7 +202,11 @@ private fun Header(equipos: List<Equipo>, anio: Int, anios: List<Int>, onAnioCha
 
 @Composable
 private fun Kpi(label: String, valor: String, color: Color) {
-    Surface(shape = RoundedCornerShape(12.dp), color = MColors.card, border = BorderStroke(1.dp, MColors.borde)) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MColors.card,
+        border = BorderStroke(1.dp, MColors.borde)
+    ) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 10.dp)) {
             Text(label, fontSize = 12.sp, color = MColors.textoSec)
             Text(valor, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = color)
@@ -186,7 +224,9 @@ private fun SelectorAnio(anio: Int, anios: List<Int>, onChange: (Int) -> Unit) {
         }
         DropdownMenu(expanded = abierto, onDismissRequest = { abierto = false }) {
             anios.forEach {
-                DropdownMenuItem(text = { Text(it.toString()) }, onClick = { onChange(it); abierto = false })
+                DropdownMenuItem(
+                    text = { Text(it.toString()) },
+                    onClick = { onChange(it); abierto = false })
             }
         }
     }
@@ -210,15 +250,33 @@ private fun PanelEquipos(
 ) {
     val listState = rememberLazyListState()
 
-    Surface(modifier, shape = RoundedCornerShape(16.dp), color = MColors.card, border = BorderStroke(1.dp, MColors.borde)) {
+    Surface(
+        modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MColors.card,
+        border = BorderStroke(1.dp, MColors.borde)
+    ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Equipos", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MColors.texto)
-                    Text("Ordenados por días restantes al próximo mantenimiento", fontSize = 12.sp, color = MColors.textoSec)
+                    Text(
+                        "Equipos",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MColors.texto
+                    )
+                    Text(
+                        "Ordenados por días restantes al próximo mantenimiento",
+                        fontSize = 12.sp,
+                        color = MColors.textoSec
+                    )
                 }
                 Button(onClick = onAgregar, shape = RoundedCornerShape(10.dp)) {
-                    Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(4.dp)); Text("Agregar")
+                    Icon(
+                        Icons.Default.Add,
+                        null,
+                        Modifier.size(18.dp)
+                    ); Spacer(Modifier.width(4.dp)); Text("Agregar")
                 }
             }
 
@@ -234,8 +292,14 @@ private fun PanelEquipos(
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(filtro == null, { onFiltro(null) }, label = { Text("Todos $total") })
-                FilterChip(filtro == TipoMant.PREVENTIVO, { onFiltro(TipoMant.PREVENTIVO) }, label = { Text("Preventivo $preventivos") })
-                FilterChip(filtro == TipoMant.CORRECTIVO, { onFiltro(TipoMant.CORRECTIVO) }, label = { Text("Correctivo $correctivos") })
+                FilterChip(
+                    filtro == TipoMant.PREVENTIVO,
+                    { onFiltro(TipoMant.PREVENTIVO) },
+                    label = { Text("Preventivo $preventivos") })
+                FilterChip(
+                    filtro == TipoMant.CORRECTIVO,
+                    { onFiltro(TipoMant.CORRECTIVO) },
+                    label = { Text("Correctivo $correctivos") })
             }
 
             // Lista con scroll propio
@@ -265,21 +329,36 @@ private fun PanelEquipos(
 private fun CardEquipo(equipo: Equipo, seleccionado: Boolean, onClick: () -> Unit) {
     val estado = estadoDe(equipo.diasRestantes)
     Surface(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = if (seleccionado) MColors.primario.copy(alpha = 0.06f) else MColors.card,
-        border = BorderStroke(if (seleccionado) 2.dp else 1.dp, if (seleccionado) MColors.primario else MColors.borde)
+        border = BorderStroke(
+            if (seleccionado) 2.dp else 1.dp,
+            if (seleccionado) MColors.primario else MColors.borde
+        )
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             ImagenEquipo(equipo, 52.dp)
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(equipo.nombre, fontWeight = FontWeight.SemiBold, color = MColors.texto, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    equipo.nombre,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MColors.texto,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 ChipTipo(equipo.tipo)
                 Text("Último: ${equipo.ultimo}", fontSize = 12.sp, color = MColors.textoSec)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("${equipo.diasRestantes} días", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = estado.color)
+                Text(
+                    "${equipo.diasRestantes} días",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = estado.color
+                )
                 Badge(estado.label, estado.color)
             }
         }
@@ -288,8 +367,16 @@ private fun CardEquipo(equipo: Equipo, seleccionado: Boolean, onClick: () -> Uni
 
 @Composable
 private fun Leyenda() {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("LEYENDA:", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MColors.textoSec)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(
+            "LEYENDA:",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MColors.textoSec
+        )
         Punto(MColors.urgente, "Urgente - menos de 7 días")
         Punto(MColors.proximo, "8-30 días")
         Punto(MColors.alDia, "Más de 30")
@@ -318,21 +405,50 @@ private fun PanelDetalle(equipo: Equipo, anio: Int, onProgramar: (Equipo) -> Uni
                 ImagenEquipo(equipo, 72.dp)
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(equipo.nombre, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MColors.texto)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            equipo.nombre,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MColors.texto
+                        )
                         ChipTipo(equipo.tipo)
                     }
-                    Text("Código ${equipo.codigo} · ${equipo.ubicacion} · Instalado en ${equipo.instalado}", fontSize = 12.sp, color = MColors.textoSec)
-                    Text(equipo.descripcion, fontSize = 13.sp, color = MColors.texto, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        "Código ${equipo.codigo} · ${equipo.ubicacion} · Instalado en ${equipo.instalado}",
+                        fontSize = 12.sp,
+                        color = MColors.textoSec
+                    )
+                    Text(
+                        equipo.descripcion,
+                        fontSize = 13.sp,
+                        color = MColors.texto,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
                 Button(onClick = { onProgramar(equipo) }, shape = RoundedCornerShape(10.dp)) {
-                    Icon(Icons.Default.DateRange, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Icon(
+                        Icons.Default.DateRange,
+                        null,
+                        Modifier.size(18.dp)
+                    ); Spacer(Modifier.width(6.dp))
                     Text("Programar mantenimiento")
                 }
             }
             Spacer(Modifier.height(12.dp))
-            Surface(shape = RoundedCornerShape(10.dp), color = estado.color.copy(alpha = 0.1f), border = BorderStroke(1.dp, estado.color.copy(alpha = 0.4f))) {
-                Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = estado.color.copy(alpha = 0.1f),
+                border = BorderStroke(1.dp, estado.color.copy(alpha = 0.4f))
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(Icons.Default.Warning, null, tint = estado.color)
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -349,12 +465,25 @@ private fun PanelDetalle(equipo: Equipo, anio: Int, onProgramar: (Equipo) -> Uni
             Tarjeta(Modifier.weight(1f)) {
                 Etiqueta("PROVEEDOR ACTUAL")
                 Text(equipo.proveedor, fontWeight = FontWeight.SemiBold, color = MColors.texto)
-                Text("${equipo.contacto} · ${equipo.telefono}", fontSize = 12.sp, color = MColors.textoSec)
+                Text(
+                    "${equipo.contacto} · ${equipo.telefono}",
+                    fontSize = 12.sp,
+                    color = MColors.textoSec
+                )
             }
             Tarjeta(Modifier.weight(1f)) {
                 Etiqueta("MONTO PRÓXIMO MANTENIMIENTO")
-                Text(equipo.montoProximo, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MColors.texto)
-                Text("Según cotización ${equipo.cotizacion}", fontSize = 12.sp, color = MColors.textoSec)
+                Text(
+                    equipo.montoProximo,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MColors.texto
+                )
+                Text(
+                    "Según cotización ${equipo.cotizacion}",
+                    fontSize = 12.sp,
+                    color = MColors.textoSec
+                )
             }
         }
 
@@ -362,12 +491,25 @@ private fun PanelDetalle(equipo: Equipo, anio: Int, onProgramar: (Equipo) -> Uni
         Tarjeta(Modifier.weight(1f).fillMaxWidth()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Historial de $anio", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MColors.texto)
-                    Text("Mantenimientos realizados y programados para este equipo", fontSize = 12.sp, color = MColors.textoSec)
+                    Text(
+                        "Historial de $anio",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MColors.texto
+                    )
+                    Text(
+                        "Mantenimientos realizados y programados para este equipo",
+                        fontSize = 12.sp,
+                        color = MColors.textoSec
+                    )
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Etiqueta("GASTO EN EL AÑO")
-                    Text(gastoAnual(equipo.historial), fontWeight = FontWeight.Bold, color = MColors.texto)
+                    Text(
+                        gastoAnual(equipo.historial),
+                        fontWeight = FontWeight.Bold,
+                        color = MColors.texto
+                    )
                 }
             }
             Spacer(Modifier.height(10.dp))
@@ -376,7 +518,11 @@ private fun PanelDetalle(equipo: Equipo, anio: Int, onProgramar: (Equipo) -> Uni
 
         // Documentos
         Tarjeta(Modifier.fillMaxWidth()) {
-            Text("Documentos del último mantenimiento", fontWeight = FontWeight.SemiBold, color = MColors.texto)
+            Text(
+                "Documentos del último mantenimiento",
+                fontWeight = FontWeight.SemiBold,
+                color = MColors.texto
+            )
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Documento("Cotización · PDF")
@@ -392,18 +538,32 @@ private fun HistorialTabla(items: List<HistorialItem>, modifier: Modifier) {
     val listState = rememberLazyListState()
     Column(modifier) {
         // Encabezado fijo
-        Row(Modifier.fillMaxWidth().background(MColors.fondo, RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = 8.dp)) {
-            Celda("FECHA", 0.15f, true); Celda("TIPO", 0.17f, true); Celda("DESCRIPCIÓN", 0.33f, true)
+        Row(
+            Modifier.fillMaxWidth().background(MColors.fondo, RoundedCornerShape(8.dp))
+                .padding(horizontal = 10.dp, vertical = 8.dp)
+        ) {
+            Celda("FECHA", 0.15f, true); Celda("TIPO", 0.17f, true); Celda(
+            "DESCRIPCIÓN",
+            0.33f,
+            true
+        )
             Celda("PROVEEDOR", 0.2f, true); Celda("MONTO", 0.15f, true)
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 14.dp)) {
                 items(items) { h ->
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Celda(h.fecha, 0.15f)
                         Box(Modifier.weight(0.17f)) {
                             Column {
-                                if (h.programado) Text("Programado", fontSize = 10.sp, color = MColors.proximo)
+                                if (h.programado) Text(
+                                    "Programado",
+                                    fontSize = 10.sp,
+                                    color = MColors.proximo
+                                )
                                 ChipTipo(h.tipo)
                             }
                         }
@@ -439,16 +599,22 @@ private fun RowScope.Celda(texto: String, peso: Float, header: Boolean = false) 
 
 @Composable
 private fun Tarjeta(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Surface(modifier, shape = RoundedCornerShape(16.dp), color = MColors.card, border = BorderStroke(1.dp, MColors.borde)) {
+    Surface(
+        modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MColors.card,
+        border = BorderStroke(1.dp, MColors.borde)
+    ) {
         Column(Modifier.padding(16.dp), content = content)
     }
 }
 
 @Composable
-private fun ImagenEquipo(equipo: Equipo, size: androidx.compose.ui.unit.Dp) {
+private fun ImagenEquipo(equipo: Equipo, size: Dp) {
     // Reemplaza por tu carga de imagen (p. ej. Coil 3 AsyncImage con equipo.imagenUrl)
     Box(
-        Modifier.size(size).clip(RoundedCornerShape(10.dp)).background(MColors.primario.copy(alpha = 0.1f)),
+        Modifier.size(size).clip(RoundedCornerShape(10.dp))
+            .background(MColors.primario.copy(alpha = 0.1f)),
         contentAlignment = Alignment.Center
     ) {
         Icon(Icons.Default.Build, contentDescription = equipo.nombre, tint = MColors.primario)
@@ -460,7 +626,8 @@ private fun ChipTipo(tipo: TipoMant) {
     val color = if (tipo == TipoMant.PREVENTIVO) MColors.preventivo else MColors.correctivo
     Text(
         tipo.label,
-        modifier = Modifier.background(color.copy(alpha = 0.1f), RoundedCornerShape(6.dp)).padding(horizontal = 6.dp, vertical = 2.dp),
+        modifier = Modifier.background(color.copy(alpha = 0.1f), RoundedCornerShape(6.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
         fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = color
     )
 }
@@ -469,7 +636,8 @@ private fun ChipTipo(tipo: TipoMant) {
 private fun Badge(texto: String, color: Color) {
     Text(
         texto,
-        modifier = Modifier.background(color.copy(alpha = 0.12f), RoundedCornerShape(50)).padding(horizontal = 8.dp, vertical = 2.dp),
+        modifier = Modifier.background(color.copy(alpha = 0.12f), RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
         fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = color
     )
 }
@@ -480,8 +648,14 @@ private fun Etiqueta(texto: String) =
 
 @Composable
 private fun Documento(nombre: String) {
-    Surface(shape = RoundedCornerShape(8.dp), border = BorderStroke(1.dp, MColors.borde), modifier = Modifier.clickable { }) {
-        Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, MColors.borde),
+        modifier = Modifier.clickable { }) {
+        Row(
+            Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(Icons.Default.Info, null, tint = MColors.urgente, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(nombre, fontSize = 12.sp, color = MColors.texto)
@@ -508,22 +682,121 @@ private fun gastoAnual(items: List<HistorialItem>): String {
 
 val equiposDemo = listOf(
     Equipo(
-        id = "1", nombre = "Ascensor Principal", tipo = TipoMant.PREVENTIVO, ultimo = "15/01/2025", diasRestantes = 3,
-        codigo = "ASC-001", ubicacion = "Torre Norte", instalado = "2018",
+        id = "1",
+        nombre = "Ascensor Principal",
+        tipo = TipoMant.PREVENTIVO,
+        ultimo = "15/01/2025",
+        diasRestantes = 3,
+        codigo = "ASC-001",
+        ubicacion = "Torre Norte",
+        instalado = "2018",
         descripcion = "Descripción del equipo (capacidad y requisitos de mantenimiento).",
-        proximaFecha = "15/04/2025", proveedor = "Elevadores Andinos",
-        contacto = "Contacto", telefono = "Teléfono", montoProximo = "$ 1.250.000", cotizacion = "N.º cotización",
+        proximaFecha = "15/04/2025",
+        proveedor = "Elevadores Andinos",
+        contacto = "Contacto",
+        telefono = "Teléfono",
+        montoProximo = "$ 1.250.000",
+        cotizacion = "N.º cotización",
         historial = listOf(
-            HistorialItem("15/04/2025", TipoMant.PREVENTIVO, "Mantenimiento programado", "Elevadores Andinos", "$ 1.250.000", programado = true),
-            HistorialItem("15/01/2025", TipoMant.PREVENTIVO, "Mantenimiento preventivo", "Elevadores Andinos", "$ 1.180.000"),
-            HistorialItem("09/01/2025", TipoMant.CORRECTIVO, "Mantenimiento correctivo", "Elevadores Andinos", "$ 1.230.000"),
-            HistorialItem("03/01/2025", TipoMant.CORRECTIVO, "Mantenimiento correctivo", "TecnoLift Ltda.", "$ 720.000"),
+            HistorialItem(
+                "15/04/2025",
+                TipoMant.PREVENTIVO,
+                "Mantenimiento programado",
+                "Elevadores Andinos",
+                "$ 1.250.000",
+                programado = true
+            ),
+            HistorialItem(
+                "15/01/2025",
+                TipoMant.PREVENTIVO,
+                "Mantenimiento preventivo",
+                "Elevadores Andinos",
+                "$ 1.180.000"
+            ),
+            HistorialItem(
+                "09/01/2025",
+                TipoMant.CORRECTIVO,
+                "Mantenimiento correctivo",
+                "Elevadores Andinos",
+                "$ 1.230.000"
+            ),
+            HistorialItem(
+                "03/01/2025",
+                TipoMant.CORRECTIVO,
+                "Mantenimiento correctivo",
+                "TecnoLift Ltda.",
+                "$ 720.000"
+            ),
         )
     ),
-    Equipo("2", "Sistema HVAC", TipoMant.PREVENTIVO, "20/03/2025", 22, "HVAC-001", "-", "-", "-", "-", "-", "-", "-", "-", "-"),
-    Equipo("3", "Bomba de Agua", TipoMant.PREVENTIVO, "05/02/2025", 12, "BOM-001", "-", "-", "-", "-", "-", "-", "-", "-", "-"),
-    Equipo("4", "Planta Eléctrica", TipoMant.PREVENTIVO, "10/04/2025", 58, "PEL-001", "-", "-", "-", "-", "-", "-", "-", "-", "-"),
-    Equipo("5", "Sistema Contra Incendios", TipoMant.CORRECTIVO, "01/05/2025", 90, "SCI-001", "-", "-", "-", "-", "-", "-", "-", "-", "-"),
+    Equipo(
+        "2",
+        "Sistema HVAC",
+        TipoMant.PREVENTIVO,
+        "20/03/2025",
+        22,
+        "HVAC-001",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ),
+    Equipo(
+        "3",
+        "Bomba de Agua",
+        TipoMant.PREVENTIVO,
+        "05/02/2025",
+        12,
+        "BOM-001",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ),
+    Equipo(
+        "4",
+        "Planta Eléctrica",
+        TipoMant.PREVENTIVO,
+        "10/04/2025",
+        58,
+        "PEL-001",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ),
+    Equipo(
+        "5",
+        "Sistema Contra Incendios",
+        TipoMant.CORRECTIVO,
+        "01/05/2025",
+        90,
+        "SCI-001",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+    ),
 )
 
 // Uso:

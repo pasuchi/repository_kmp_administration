@@ -4,8 +4,6 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object Home : NavKey
-@Serializable
 data object InicioRoot : NavKey
 
 @Serializable
@@ -16,4 +14,10 @@ data object LoginRoot : NavKey
 data object DetailEquipment : NavKey
 
 @Serializable
-data object ScreenC : NavKey
+data object GestionMantenimiento : NavKey
+
+@Serializable
+data object RegistrarMantenimiento : NavKey
+
+@Serializable
+data object NuevoProovedor : NavKey

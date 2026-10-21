@@ -7,14 +7,13 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 class EquipmentApi(private val httpClient: HttpClient) {
-    private val baseUrl = "https://mi-api-drive-470163071363.us-central1.run.app"
 
     suspend fun getMantenimientos(): List<EquipmentMantListResponse> {
-        return httpClient.get("$baseUrl/mantenimientos").body()
+        return httpClient.get("mantenimientos").body()
     }
 
     suspend fun getMantenimientosKMP(): List<EquipmentResponse> {
-        return httpClient.get("$baseUrl/equipment/api/getequipment").body()
+        return httpClient.get("equipment/api/getequipment").body()
     }
 
 }

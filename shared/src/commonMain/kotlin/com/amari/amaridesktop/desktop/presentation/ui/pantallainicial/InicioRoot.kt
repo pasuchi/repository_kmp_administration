@@ -27,7 +27,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.amari.amaridesktop.desktop.presentation.ui.pantallainicial.components.InicioHeader
+import com.amari.amaridesktop.desktop.presentation.ui.pantallainicial.event.InicioEvent
 import com.amari.amaridesktop.desktop.theme.Colors
+import org.koin.compose.koinInject
 
 // ==========================================
 // COLORES
@@ -55,6 +57,47 @@ data class InicioResumen(
 // ==========================================
 // PANTALLA
 // ==========================================
+
+
+@Composable
+fun InicioScreenRoot(){
+
+    val vm : InicioViewmodel = koinInject()
+
+
+    InicioScreen(
+        resumen = InicioResumen(
+            edificio = "Edificio Amari",
+            usuarioNombre = "Admin",
+            usuarioRol = "Administrador",
+            fechaTexto = "Jueves, 15 de octubre",
+            horaActual = 9,
+            totalEquipos = 5,
+            equiposUrgentes = 1,
+            ultimoRegistroTexto = "hace 3 días",
+            totalProveedores = 12,
+            notificacionesPendientes = 2,
+            version = "v1.0",
+            anio = 2026
+        ),
+        onGestionMantenimiento = {
+           vm.onEvent(InicioEvent.GestionMantenimiento())
+        },
+        onRegistrarMantenimiento = {
+            vm.onEvent(InicioEvent.RegistrarMantenimiento())
+        },
+        onNuevoProveedor = {
+            vm.onEvent(InicioEvent.NuevoProveedor())
+        },
+        onNotificaciones = {
+            println("Abrir notificaciones")
+        },
+        onPerfil = {
+            println("Abrir perfil")
+        }
+    )
+
+}
 
 @Composable
 fun InicioScreen(

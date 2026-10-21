@@ -82,7 +82,10 @@ class EquipmentViewModel(
                         ArgsModel(
                             key = "equipmentMantListModel",
                             value = event.equipmentMantListModel
-                        )
+                        ) GestionMantenimientoScreen(
+                    equipos = equiposDemo,
+                    aniosDisponibles = listOf(2026, 2025, 2024)
+                )
                     )
                 )
 

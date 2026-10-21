@@ -3,14 +3,12 @@ package com.amari.amaridesktop.desktop.presentation
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,12 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.amari.amaridesktop.desktop.presentation.component.Header
+import com.amari.amaridesktop.desktop.presentation.ui.gestionmantenimiento.TipoMant
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -129,7 +128,10 @@ fun RegistrarMantenimientoScreen(
     equipoInicialId: String? = null,
     onElegirArchivo: ((titulo: String, extensiones: List<String>) -> ArchivoAdjunto?)? = null
 ) {
-    var equipo by remember { mutableStateOf(equipos.firstOrNull { it.uniqueCode == equipoInicialId } ?: equipos.firstOrNull()) }
+    var equipo by remember {
+        mutableStateOf(equipos.firstOrNull { it.uniqueCode == equipoInicialId }
+            ?: equipos.firstOrNull())
+    }
     var tipo by remember { mutableStateOf(TipoMant.PREVENTIVO) }
     var fecha by remember { mutableStateOf(fechaHoy) }
     var proximo by remember { mutableStateOf<LocalDate?>(null) }
@@ -160,23 +162,9 @@ fun RegistrarMantenimientoScreen(
 
     Column(Modifier.fillMaxSize().background(MantColors.fondo)) {
         // Barra superior
-        Surface(color = MantColors.card, border = BorderStroke(1.dp, MantColors.borde)) {
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = onVolver) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Volver")
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("Registrar Mantenimiento", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
-                    Text("Gestión de Mantenimiento / Nuevo registro - Edificio Torre Norte", fontSize = 12.sp, color = MantColors.textoSec)
-                }
-            }
-        }
+        Header(goBack = {
+            onVolver.invoke()
+        }, "Registrar Mantenimiento")
 
         // Formulario
         Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -191,18 +179,36 @@ fun RegistrarMantenimientoScreen(
                 ) {
                     Text("* Campos obligatorios", fontSize = 12.sp, color = MantColors.textoSec)
 
-                    SeccionForm(1, "Equipo", "Selecciona el equipo intervenido y el tipo de trabajo.") {
+                    SeccionForm(
+                        1,
+                        "Equipo",
+                        "Selecciona el equipo intervenido y el tipo de trabajo."
+                    ) {
                         EtiquetaCampo("Equipo", true)
                         SelectorEquipoDropdown(equipos, equipo) { equipo = it }
                         Spacer(Modifier.height(14.dp))
                         EtiquetaCampo("Tipo de mantenimiento", true)
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OpcionTipoMant("Preventivo", "Programado según calendario", tipo == TipoMant.PREVENTIVO, Modifier.weight(1f)) { tipo = TipoMant.PREVENTIVO }
-                            OpcionTipoMant("Correctivo", "Reparación por falla", tipo == TipoMant.CORRECTIVO, Modifier.weight(1f)) { tipo = TipoMant.CORRECTIVO }
+                            OpcionTipoMant(
+                                "Preventivo",
+                                "Programado según calendario",
+                                tipo == TipoMant.PREVENTIVO,
+                                Modifier.weight(1f)
+                            ) { tipo = TipoMant.PREVENTIVO }
+                            OpcionTipoMant(
+                                "Correctivo",
+                                "Reparación por falla",
+                                tipo == TipoMant.CORRECTIVO,
+                                Modifier.weight(1f)
+                            ) { tipo = TipoMant.CORRECTIVO }
                         }
                     }
 
-                    SeccionForm(2, "Fechas", "La próxima fecha alimenta el contador de días restantes del listado.") {
+                    SeccionForm(
+                        2,
+                        "Fechas",
+                        "La próxima fecha alimenta el contador de días restantes del listado."
+                    ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Column(Modifier.weight(1f)) {
                                 EtiquetaCampo("Fecha de realización", true)
@@ -210,7 +216,11 @@ fun RegistrarMantenimientoScreen(
                             }
                             Column(Modifier.weight(1f)) {
                                 EtiquetaCampo("Próximo mantenimiento programado", false)
-                                CampoDatePicker(proximo, onChange = { proximo = it; proximoEditado = true }, error = errProximo)
+                                CampoDatePicker(
+                                    proximo,
+                                    onChange = { proximo = it; proximoEditado = true },
+                                    error = errProximo
+                                )
                                 Text(
                                     if (errProximo) "Debe ser posterior a la fecha de realización."
                                     else "Sugerido: en $meses meses según historial del equipo.",
@@ -222,15 +232,28 @@ fun RegistrarMantenimientoScreen(
                         }
                     }
 
-                    SeccionForm(3, "Proveedor y costo", "Empresa o técnico que realizó el servicio.") {
+                    SeccionForm(
+                        3,
+                        "Proveedor y costo",
+                        "Empresa o técnico que realizó el servicio."
+                    ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             Column(Modifier.weight(1f)) {
                                 EtiquetaCampo("Nombre del proveedor", true)
-                                CampoTexto(proveedor, { proveedor = it }, "Ej. Ascensores Schindler S.A.", errProveedor)
+                                CampoTexto(
+                                    proveedor,
+                                    { proveedor = it },
+                                    "Ej. Ascensores Schindler S.A.",
+                                    errProveedor
+                                )
                             }
                             Column(Modifier.weight(1f)) {
                                 EtiquetaCampo("Teléfono / Contacto (opcional)", false)
-                                CampoTexto(contacto, { contacto = it }, "Ej. 601 345 6789 - Ing. Ramírez")
+                                CampoTexto(
+                                    contacto,
+                                    { contacto = it },
+                                    "Ej. 601 345 6789 - Ing. Ramírez"
+                                )
                             }
                         }
                         Spacer(Modifier.height(14.dp))
@@ -253,7 +276,11 @@ fun RegistrarMantenimientoScreen(
                         }
                     }
 
-                    SeccionForm(4, "Descripción", "Detalle que aparecerá en el historial anual del equipo.") {
+                    SeccionForm(
+                        4,
+                        "Descripción",
+                        "Detalle que aparecerá en el historial anual del equipo."
+                    ) {
                         EtiquetaCampo("Descripción del trabajo realizado", true)
                         CampoTexto(
                             descripcion, { descripcion = it },
@@ -262,20 +289,61 @@ fun RegistrarMantenimientoScreen(
                         )
                         Spacer(Modifier.height(14.dp))
                         EtiquetaCampo("Observaciones (opcional)", false)
-                        CampoTexto(observaciones, { observaciones = it }, "Repuestos pendientes, recomendaciones del técnico, etc.", minLines = 3)
+                        CampoTexto(
+                            observaciones,
+                            { observaciones = it },
+                            "Repuestos pendientes, recomendaciones del técnico, etc.",
+                            minLines = 3
+                        )
                     }
 
-                    SeccionForm(5, "Documentos adjuntos", "Quedarán disponibles como enlaces en el detalle del equipo.") {
+                    SeccionForm(
+                        5,
+                        "Documentos adjuntos",
+                        "Quedarán disponibles como enlaces en el detalle del equipo."
+                    ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            BotonSubirDoc("Cotización", "PDF, JPG, PNG - máx 5MB", listOf("pdf", "jpg", "jpeg", "png"), 5,
-                                cotizacion, { cotizacion = it }, { errorArchivo = it }, onElegirArchivo, Modifier.weight(1f))
-                            BotonSubirDoc("Recibo / Factura", "PDF, JPG, PNG - máx 5MB", listOf("pdf", "jpg", "jpeg", "png"), 5,
-                                recibo, { recibo = it }, { errorArchivo = it }, onElegirArchivo, Modifier.weight(1f))
-                            BotonSubirDoc("Informe técnico", "PDF, DOC - máx 10MB", listOf("pdf", "doc", "docx"), 10,
-                                informe, { informe = it }, { errorArchivo = it }, onElegirArchivo, Modifier.weight(1f))
+                            BotonSubirDoc(
+                                "Cotización",
+                                "PDF, JPG, PNG - máx 5MB",
+                                listOf("pdf", "jpg", "jpeg", "png"),
+                                5,
+                                cotizacion,
+                                { cotizacion = it },
+                                { errorArchivo = it },
+                                onElegirArchivo,
+                                Modifier.weight(1f)
+                            )
+                            BotonSubirDoc(
+                                "Recibo / Factura",
+                                "PDF, JPG, PNG - máx 5MB",
+                                listOf("pdf", "jpg", "jpeg", "png"),
+                                5,
+                                recibo,
+                                { recibo = it },
+                                { errorArchivo = it },
+                                onElegirArchivo,
+                                Modifier.weight(1f)
+                            )
+                            BotonSubirDoc(
+                                "Informe técnico",
+                                "PDF, DOC - máx 10MB",
+                                listOf("pdf", "doc", "docx"),
+                                10,
+                                informe,
+                                { informe = it },
+                                { errorArchivo = it },
+                                onElegirArchivo,
+                                Modifier.weight(1f)
+                            )
                         }
                         errorArchivo?.let {
-                            Text(it, color = MantColors.error, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                            Text(
+                                it,
+                                color = MantColors.error,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
                         }
                     }
                 }
@@ -289,12 +357,20 @@ fun RegistrarMantenimientoScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.Default.Info, null, tint = MantColors.textoSec, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Default.Info,
+                    null,
+                    tint = MantColors.textoSec,
+                    modifier = Modifier.size(18.dp)
+                )
                 Text(
                     "Se actualizará el historial ${fecha.year} del equipo seleccionado.",
                     fontSize = 13.sp, color = MantColors.textoSec, modifier = Modifier.weight(1f)
                 )
-                OutlinedButton(onClick = onVolver, shape = RoundedCornerShape(10.dp)) { Text("Cancelar") }
+                OutlinedButton(
+                    onClick = onVolver,
+                    shape = RoundedCornerShape(10.dp)
+                ) { Text("Cancelar") }
                 Button(
                     onClick = {
                         intentoGuardar = true
@@ -367,8 +443,17 @@ fun GestionMantenimientoScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text("Gestión de Mantenimiento", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
-                    Text("Control y seguimiento de equipos e infraestructura del edificio", fontSize = 13.sp, color = MantColors.textoSec)
+                    Text(
+                        "Gestión de Mantenimiento",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MantColors.texto
+                    )
+                    Text(
+                        "Control y seguimiento de equipos e infraestructura del edificio",
+                        fontSize = 13.sp,
+                        color = MantColors.textoSec
+                    )
                 }
                 OutlinedButton(onClick = onDescargarReporte, shape = RoundedCornerShape(10.dp)) {
                     Icon(Icons.Default.Share, null, Modifier.size(18.dp))
@@ -402,7 +487,13 @@ fun GestionMantenimientoScreen(
                         onValueChange = { busqueda = it },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("Buscar equipo...") },
-                        leadingIcon = { Icon(Icons.Default.Search, null, tint = MantColors.textoSec) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Search,
+                                null,
+                                tint = MantColors.textoSec
+                            )
+                        },
                         singleLine = true,
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -456,39 +547,92 @@ fun GestionMantenimientoScreen(
                             // Cabecera del equipo
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
-                                    Modifier.size(48.dp).background(MantColors.primario.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                                    Modifier.size(48.dp).background(
+                                        MantColors.primario.copy(alpha = 0.1f),
+                                        RoundedCornerShape(12.dp)
+                                    ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(Icons.Default.Build, null, tint = MantColors.primario)
                                 }
                                 Spacer(Modifier.width(14.dp))
                                 Column(Modifier.weight(1f)) {
-                                    Text(eq.nombre, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
-                                    Text("${eq.categoria} • ${eq.ubicacion}", fontSize = 13.sp, color = MantColors.textoSec)
+                                    Text(
+                                        eq.nombre,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MantColors.texto
+                                    )
+                                    Text(
+                                        "${eq.categoria} • ${eq.ubicacion}",
+                                        fontSize = 13.sp,
+                                        color = MantColors.textoSec
+                                    )
                                 }
-                                SelectorAnio(aniosDisponibles, anioSeleccionado) { anioSeleccionado = it }
+                                SelectorAnio(
+                                    aniosDisponibles,
+                                    anioSeleccionado
+                                ) { anioSeleccionado = it }
                             }
                         }
 
                         item {
                             // KPIs
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                KpiCard("Próximo en", "${eq.diasRestantes} días", eq.proximoMantenimiento, Modifier.weight(1f))
-                                KpiCard("Último servicio", eq.ultimoMantenimiento, eq.proveedorHabitual, Modifier.weight(1f))
-                                KpiCard("Estado", eq.estado, "Frecuencia: ${eq.periodoMeses}m", Modifier.weight(1f))
+                                KpiCard(
+                                    "Próximo en",
+                                    "${eq.diasRestantes} días",
+                                    eq.proximoMantenimiento,
+                                    Modifier.weight(1f)
+                                )
+                                KpiCard(
+                                    "Último servicio",
+                                    eq.ultimoMantenimiento,
+                                    eq.proveedorHabitual,
+                                    Modifier.weight(1f)
+                                )
+                                KpiCard(
+                                    "Estado",
+                                    eq.estado,
+                                    "Frecuencia: ${eq.periodoMeses}m",
+                                    Modifier.weight(1f)
+                                )
                             }
                         }
 
                         item {
-                            Text("Historial de Mantenimientos ($anioSeleccionado)", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
+                            Text(
+                                "Historial de Mantenimientos ($anioSeleccionado)",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MantColors.texto
+                            )
                         }
 
                         // Muestra de historial simulado para el preview
                         items(
                             listOf(
-                                HistorialITEMMM("2026-10-13", "Mantenimiento Preventivo Trimestral", "Ascensores Schindler S.A.", "$ 1.250.000", TipoMant.PREVENTIVO),
-                                HistorialITEMMM("2026-07-10", "Revisión cables y motor", "Ascensores Schindler S.A.", "$ 850.000", TipoMant.PREVENTIVO),
-                                HistorialITEMMM("2026-04-02", "Cambio de botonera piso 4", "Ascensores Schindler S.A.", "$ 320.000", TipoMant.CORRECTIVO)
+                                HistorialITEMMM(
+                                    "2026-10-13",
+                                    "Mantenimiento Preventivo Trimestral",
+                                    "Ascensores Schindler S.A.",
+                                    "$ 1.250.000",
+                                    TipoMant.PREVENTIVO
+                                ),
+                                HistorialITEMMM(
+                                    "2026-07-10",
+                                    "Revisión cables y motor",
+                                    "Ascensores Schindler S.A.",
+                                    "$ 850.000",
+                                    TipoMant.PREVENTIVO
+                                ),
+                                HistorialITEMMM(
+                                    "2026-04-02",
+                                    "Cambio de botonera piso 4",
+                                    "Ascensores Schindler S.A.",
+                                    "$ 320.000",
+                                    TipoMant.CORRECTIVO
+                                )
                             )
                         ) { h ->
                             FilaHistorial(h)
@@ -496,7 +640,10 @@ fun GestionMantenimientoScreen(
                     }
                 } ?: run {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Selecciona un equipo para ver su detalle", color = MantColors.textoSec)
+                        Text(
+                            "Selecciona un equipo para ver su detalle",
+                            color = MantColors.textoSec
+                        )
                     }
                 }
             }
@@ -509,16 +656,38 @@ fun GestionMantenimientoScreen(
 // ==========================================
 
 @Composable
-private fun SeccionForm(numero: Int, titulo: String, descripcion: String, content: @Composable ColumnScope.() -> Unit) {
-    Surface(shape = RoundedCornerShape(16.dp), color = MantColors.card, border = BorderStroke(1.dp, MantColors.borde)) {
+private fun SeccionForm(
+    numero: Int,
+    titulo: String,
+    descripcion: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MantColors.card,
+        border = BorderStroke(1.dp, MantColors.borde)
+    ) {
         Column(Modifier.fillMaxWidth().padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(28.dp).background(MantColors.primario, CircleShape), contentAlignment = Alignment.Center) {
-                    Text("$numero", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Box(
+                    Modifier.size(28.dp).background(MantColors.primario, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "$numero",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
                 }
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Text(titulo, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
+                    Text(
+                        titulo,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MantColors.texto
+                    )
                     Text(descripcion, fontSize = 12.sp, color = MantColors.textoSec)
                 }
             }
@@ -537,14 +706,22 @@ private fun EtiquetaCampo(texto: String, obligatorio: Boolean) {
 }
 
 @Composable
-private fun CampoTexto(valor: String, onChange: (String) -> Unit, placeholder: String, error: Boolean = false, minLines: Int = 1) {
+private fun CampoTexto(
+    valor: String,
+    onChange: (String) -> Unit,
+    placeholder: String,
+    error: Boolean = false,
+    minLines: Int = 1
+) {
     OutlinedTextField(
         value = valor,
         onValueChange = onChange,
         modifier = Modifier.fillMaxWidth(),
         placeholder = { Text(placeholder, color = MantColors.textoSec) },
         isError = error,
-        supportingText = if (error) { { Text("Campo obligatorio") } } else null,
+        supportingText = if (error) {
+            { Text("Campo obligatorio") }
+        } else null,
         singleLine = minLines == 1,
         minLines = minLines,
         shape = RoundedCornerShape(10.dp)
@@ -552,7 +729,11 @@ private fun CampoTexto(valor: String, onChange: (String) -> Unit, placeholder: S
 }
 
 @Composable
-private fun SelectorEquipoDropdown(equipos: List<EquipoOpcion>, seleccionado: EquipoOpcion?, onSelect: (EquipoOpcion) -> Unit) {
+private fun SelectorEquipoDropdown(
+    equipos: List<EquipoOpcion>,
+    seleccionado: EquipoOpcion?,
+    onSelect: (EquipoOpcion) -> Unit
+) {
     var abierto by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -567,19 +748,30 @@ private fun SelectorEquipoDropdown(equipos: List<EquipoOpcion>, seleccionado: Eq
         Box(Modifier.matchParentSize().clip(RoundedCornerShape(10.dp)).clickable { abierto = true })
         DropdownMenu(expanded = abierto, onDismissRequest = { abierto = false }) {
             equipos.forEach {
-                DropdownMenuItem(text = { Text(it.nombre) }, onClick = { onSelect(it); abierto = false })
+                DropdownMenuItem(
+                    text = { Text(it.nombre) },
+                    onClick = { onSelect(it); abierto = false })
             }
         }
     }
 }
 
 @Composable
-private fun OpcionTipoMant(titulo: String, subtitulo: String, seleccionado: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun OpcionTipoMant(
+    titulo: String,
+    subtitulo: String,
+    seleccionado: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
     Surface(
         modifier = modifier.clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = if (seleccionado) MantColors.primario.copy(alpha = 0.06f) else MantColors.card,
-        border = BorderStroke(if (seleccionado) 2.dp else 1.dp, if (seleccionado) MantColors.primario else MantColors.borde)
+        border = BorderStroke(
+            if (seleccionado) 2.dp else 1.dp,
+            if (seleccionado) MantColors.primario else MantColors.borde
+        )
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             RadioButton(selected = seleccionado, onClick = onClick)
@@ -593,7 +785,11 @@ private fun OpcionTipoMant(titulo: String, subtitulo: String, seleccionado: Bool
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CampoDatePicker(fecha: LocalDate?, onChange: (LocalDate?) -> Unit, error: Boolean = false) {
+private fun CampoDatePicker(
+    fecha: LocalDate?,
+    onChange: (LocalDate?) -> Unit,
+    error: Boolean = false
+) {
     var abierto by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -638,12 +834,21 @@ private fun BotonSubirDoc(
         modifier = modifier.clip(RoundedCornerShape(12.dp)).clickable {
             val f = onElegirArchivo?.invoke(titulo, extensiones) ?: run {
                 // Mock si no se suministra el selector nativo
-                ArchivoAdjunto("documento_adjunto.pdf", "/temp/documento_adjunto.pdf", 1024L * 1024L)
+                ArchivoAdjunto(
+                    "documento_adjunto.pdf",
+                    "/temp/documento_adjunto.pdf",
+                    1024L * 1024L
+                )
             }
             when {
-                extensiones.none { f.nombre.lowercase().endsWith(".$it") } -> onError("$titulo: formato no permitido ($formatos).")
+                extensiones.none {
+                    f.nombre.lowercase().endsWith(".$it")
+                } -> onError("$titulo: formato no permitido ($formatos).")
+
                 f.tamanoBytes > maxMB * 1024L * 1024L -> onError("$titulo: el archivo supera $maxMB MB.")
-                else -> { onError(null); onArchivo(f) }
+                else -> {
+                    onError(null); onArchivo(f)
+                }
             }
         },
         shape = RoundedCornerShape(12.dp),
@@ -661,8 +866,20 @@ private fun BotonSubirDoc(
                 null, tint = MantColors.primario, modifier = Modifier.size(28.dp)
             )
             if (archivo != null) {
-                Text(archivo.nombre, fontSize = 12.sp, color = MantColors.texto, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                TextButton(onClick = { onArchivo(null) }) { Text("Quitar", fontSize = 12.sp, color = MantColors.error) }
+                Text(
+                    archivo.nombre,
+                    fontSize = 12.sp,
+                    color = MantColors.texto,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                TextButton(onClick = { onArchivo(null) }) {
+                    Text(
+                        "Quitar",
+                        fontSize = 12.sp,
+                        color = MantColors.error
+                    )
+                }
             } else {
                 Text("Arrastra o haz clic para subir", fontSize = 12.sp, color = MantColors.texto)
                 Text(formatos, fontSize = 11.sp, color = MantColors.textoSec)
@@ -674,17 +891,26 @@ private fun BotonSubirDoc(
 @Composable
 private fun ItemEquipoLista(equipo: EquipoItem, seleccionado: Boolean, onSelect: () -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onSelect),
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onSelect),
         shape = RoundedCornerShape(12.dp),
         color = if (seleccionado) MantColors.primario.copy(alpha = 0.08f) else MantColors.card,
-        border = BorderStroke(if (seleccionado) 1.5.dp else 1.dp, if (seleccionado) MantColors.primario else MantColors.borde)
+        border = BorderStroke(
+            if (seleccionado) 1.5.dp else 1.dp,
+            if (seleccionado) MantColors.primario else MantColors.borde
+        )
     ) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(40.dp).background(MantColors.fondo, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Build, null, tint = MantColors.textoSec, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.Build,
+                    null,
+                    tint = MantColors.textoSec,
+                    modifier = Modifier.size(20.dp)
+                )
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -692,8 +918,16 @@ private fun ItemEquipoLista(equipo: EquipoItem, seleccionado: Boolean, onSelect:
                 Text(equipo.categoria, fontSize = 12.sp, color = MantColors.textoSec)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("${equipo.diasRestantes}d", fontWeight = FontWeight.Bold, color = if (equipo.diasRestantes < 15) MantColors.error else MantColors.exito)
-                Text(equipo.tipo.name.lowercase().replaceFirstChar { it.uppercase() }, fontSize = 11.sp, color = MantColors.textoSec)
+                Text(
+                    "${equipo.diasRestantes}d",
+                    fontWeight = FontWeight.Bold,
+                    color = if (equipo.diasRestantes < 15) MantColors.error else MantColors.exito
+                )
+                Text(
+                    equipo.tipo.name.lowercase().replaceFirstChar { it.uppercase() },
+                    fontSize = 11.sp,
+                    color = MantColors.textoSec
+                )
             }
         }
     }
@@ -710,7 +944,13 @@ private fun KpiCard(etiqueta: String, valor: String, detalle: String, modifier: 
         Column(Modifier.padding(14.dp)) {
             Text(etiqueta, fontSize = 12.sp, color = MantColors.textoSec)
             Text(valor, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MantColors.texto)
-            Text(detalle, fontSize = 11.sp, color = MantColors.textoSec, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                detalle,
+                fontSize = 11.sp,
+                color = MantColors.textoSec,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -728,7 +968,11 @@ private fun FilaHistorial(item: HistorialITEMMM) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(item.titulo, fontWeight = FontWeight.SemiBold, color = MantColors.texto)
-                Text("${item.fecha} • ${item.proveedor}", fontSize = 12.sp, color = MantColors.textoSec)
+                Text(
+                    "${item.fecha} • ${item.proveedor}",
+                    fontSize = 12.sp,
+                    color = MantColors.textoSec
+                )
             }
             Text(item.monto, fontWeight = FontWeight.Bold, color = MantColors.texto)
         }
